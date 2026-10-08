@@ -14,6 +14,10 @@ type Config struct {
 	CurrentUserName string `json:"current_user_name"`
 }
 
+func (cfg *Config) runCommand() {
+
+}
+
 func (cfg *Config) SetUser(name string) error {
 	cfg.CurrentUserName = name
 	if err := write(cfg); err != nil {
@@ -23,6 +27,7 @@ func (cfg *Config) SetUser(name string) error {
 	return nil
 }
 
+// Read returns the local config files content
 func Read() (*Config, error) {
 	// Get the config filepath
 	fullPath, err := getConfigFilePath()
@@ -48,6 +53,7 @@ func Read() (*Config, error) {
 	return &cfg, nil
 }
 
+// getConfigFilePath gets local $HOME directory
 func getConfigFilePath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -58,6 +64,7 @@ func getConfigFilePath() (string, error) {
 	return fullPath, nil
 }
 
+// write to local config file
 func write(cfg *Config) error {
 	// Get the config filepath
 	dir, err := getConfigFilePath()
