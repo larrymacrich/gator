@@ -14,10 +14,6 @@ type Config struct {
 	CurrentUserName string `json:"current_user_name"`
 }
 
-func (cfg *Config) runCommand() {
-
-}
-
 func (cfg *Config) SetUser(name string) error {
 	cfg.CurrentUserName = name
 	if err := write(cfg); err != nil {
