@@ -28,7 +28,7 @@ type command struct {
 func (c *commands) run(s *state, cmd command) error {
 	cmdHandler, exists := c.mapCommands[cmd.name]
 	if !exists {
-		errMsg := fmt.Errorf("invalid command: %s\n", cmd.name)
+		errMsg := fmt.Errorf("invalid command: %s", cmd.name)
 		return errMsg
 	}
 
@@ -46,7 +46,7 @@ func (c *commands) register(name string, f func(*state, command) error) {
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.args) == 0 {
-		errMsg := fmt.Errorf("missing username for command: %s\n", cmd.name)
+		errMsg := fmt.Errorf("missing username for command: %s", cmd.name)
 		return errMsg
 	}
 
@@ -58,14 +58,14 @@ func handlerLogin(s *state, cmd command) error {
 	}
 	_, err := s.db.GetUser(context.Background(), sqlUserName)
 	if err != nil {
-		errMsg := fmt.Errorf("login user '%s' failed: User not registered. \n", userName)
+		errMsg := fmt.Errorf("login user '%s' failed: User not registered.", userName)
 		return errMsg
 	}
 
 	// login user
 	err = s.cfg.SetUser(userName)
 	if err != nil {
-		errMsg := fmt.Errorf("login user '%s' failed: %w\n", userName, err)
+		errMsg := fmt.Errorf("login user '%s' failed: %w", userName, err)
 		return errMsg
 	}
 	fmt.Printf("login user '%s' successful.\n", userName)
@@ -75,7 +75,7 @@ func handlerLogin(s *state, cmd command) error {
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.args) == 0 {
-		errMsg := fmt.Errorf("missing username for command: %s\n", cmd.name)
+		errMsg := fmt.Errorf("missing username for command: %s", cmd.name)
 		return errMsg
 	}
 
@@ -93,7 +93,7 @@ func handlerRegister(s *state, cmd command) error {
 	}
 	_, err := s.db.CreateUser(context.Background(), userParams)
 	if err != nil {
-		errMsg := fmt.Errorf("creating user '%s' failed: %w\n", userName, err)
+		errMsg := fmt.Errorf("creating user '%s' failed: %w", userName, err)
 		return errMsg
 	}
 	fmt.Printf("user '%s' has been created successfully:\n", userName)
@@ -101,10 +101,27 @@ func handlerRegister(s *state, cmd command) error {
 	// login user
 	err = s.cfg.SetUser(userName)
 	if err != nil {
-		errMsg := fmt.Errorf("login user '%s' failed: %w\n", userName, err)
+		errMsg := fmt.Errorf("login user '%s' failed: %w", userName, err)
 		return errMsg
 	}
 	fmt.Printf("login user '%s' successful.\n", userName)
+
+	return nil
+}
+
+func handlerReset(s *state, cmd command) error {
+	if len(cmd.args) > 0 {
+		errMsg := fmt.Errorf("no arguments required")
+		return errMsg
+	}
+
+	// resetting users table
+	err := s.db.DeleteUsers(context.Background())
+	if err != nil {
+		errMsg := fmt.Errorf("resetting user table failed: %w", err)
+		return errMsg
+	}
+	fmt.Printf("user table has been reset successfully.\n")
 
 	return nil
 }
