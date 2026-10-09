@@ -2,7 +2,6 @@ package cli
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -18,15 +17,11 @@ func handlerRegister(s *state, cmd command) error {
 
 	// create new user data
 	userName := cmd.args[0]
-	sqlUserName := sql.NullString{
-		String: userName,
-		Valid:  true,
-	}
 	userParams := database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Name:      sqlUserName,
+		Name:      userName,
 	}
 	_, err := s.db.CreateUser(context.Background(), userParams)
 	if err != nil {

@@ -44,6 +44,7 @@ func RunCommand() error {
 	cliCommands.register("reset", handlerReset)
 	cliCommands.register("users", handlerList)
 	cliCommands.register("agg", handlerAgg)
+	cliCommands.register("addfeed", handlerAddFeed)
 
 	// Setup CMD
 	cliArgs := os.Args

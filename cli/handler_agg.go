@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	url = "https://www.wagslane.dev/index.xml"
+	feedUrl = "https://www.wagslane.dev/index.xml"
 )
 
 func handlerAgg(s *state, cmd command) error {
@@ -19,9 +19,9 @@ func handlerAgg(s *state, cmd command) error {
 
 	// fetch rss feed
 	client := api.NewClient()
-	feed, err := client.FetchFeed(context.Background(), url)
+	feed, err := client.FetchFeed(context.Background(), feedUrl)
 	if err != nil {
-		errMsg := fmt.Errorf("fetching rss feed at '%s' failed: %w", url, err)
+		errMsg := fmt.Errorf("fetching rss feed at '%s' failed: %w", feedUrl, err)
 		return errMsg
 	}
 
