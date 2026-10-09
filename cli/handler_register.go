@@ -10,8 +10,8 @@ import (
 )
 
 func handlerRegister(s *state, cmd command) error {
-	if len(cmd.args) == 0 {
-		errMsg := fmt.Errorf("missing username for command: %s", cmd.name)
+	if len(cmd.args) != 1 {
+		errMsg := fmt.Errorf("usage: %s <name>", cmd.name)
 		return errMsg
 	}
 

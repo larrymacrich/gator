@@ -6,8 +6,8 @@ import (
 )
 
 func handlerReset(s *state, cmd command) error {
-	if len(cmd.args) > 0 {
-		errMsg := fmt.Errorf("no arguments required")
+	if len(cmd.args) != 0 {
+		errMsg := fmt.Errorf("usage: %s no arguments required", cmd.name)
 		return errMsg
 	}
 

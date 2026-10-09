@@ -11,7 +11,7 @@ import (
 
 func handlerAddFeed(s *state, cmd command) error {
 	if len(cmd.args) != 2 {
-		errMsg := fmt.Errorf("missing arguemnt(s) for command: %s", cmd.name)
+		errMsg := fmt.Errorf("usage: %s <name> <url>", cmd.name)
 		return errMsg
 	}
 
