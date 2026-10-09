@@ -2,23 +2,18 @@ package cli
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 )
 
 func handlerLogin(s *state, cmd command) error {
-	if len(cmd.args) == 0 {
-		errMsg := fmt.Errorf("missing username for command: %s", cmd.name)
+	if len(cmd.args) != 1 {
+		errMsg := fmt.Errorf("usage: %s <name>", cmd.name)
 		return errMsg
 	}
 
 	// get user data
 	userName := cmd.args[0]
-	sqlUserName := sql.NullString{
-		String: userName,
-		Valid:  true,
-	}
-	_, err := s.db.GetUser(context.Background(), sqlUserName)
+	_, err := s.db.GetUser(context.Background(), userName)
 	if err != nil {
 		errMsg := fmt.Errorf("login user '%s' failed: User not registered.", userName)
 		return errMsg

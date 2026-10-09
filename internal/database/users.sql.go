@@ -7,7 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,7 +27,7 @@ type CreateUserParams struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Name      sql.NullString
+	Name      string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -60,11 +59,10 @@ func (q *Queries) DeleteUsers(ctx context.Context) error {
 const getUser = `-- name: GetUser :one
 SELECT id, created_at, updated_at, name
 FROM users
-WHERE
-name = $1
+WHERE name = $1
 `
 
-func (q *Queries) GetUser(ctx context.Context, name sql.NullString) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, name string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, name)
 	var i User
 	err := row.Scan(
@@ -74,6 +72,19 @@ func (q *Queries) GetUser(ctx context.Context, name sql.NullString) (User, error
 		&i.Name,
 	)
 	return i, err
+}
+
+const getUserNameByUserID = `-- name: GetUserNameByUserID :one
+SELECT name
+FROM users
+WHERE id = $1
+`
+
+func (q *Queries) GetUserNameByUserID(ctx context.Context, id uuid.UUID) (string, error) {
+	row := q.db.QueryRowContext(ctx, getUserNameByUserID, id)
+	var name string
+	err := row.Scan(&name)
+	return name, err
 }
 
 const getUsers = `-- name: GetUsers :many
