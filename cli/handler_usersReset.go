@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func handlerReset(s *state, cmd command) error {
+func handlerResetUsers(s *state, cmd command) error {
 	if len(cmd.args) != 0 {
 		errMsg := fmt.Errorf("usage: %s no arguments required", cmd.name)
 		return errMsg

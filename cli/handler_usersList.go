@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func handlerList(s *state, cmd command) error {
+func handlerListUsers(s *state, cmd command) error {
 	if len(cmd.args) != 0 {
 		errMsg := fmt.Errorf("usage: %s no arguments required", cmd.name)
 		return errMsg
@@ -14,7 +14,7 @@ func handlerList(s *state, cmd command) error {
 	// get users
 	users, err := s.db.GetUsers(context.Background())
 	if err != nil {
-		errMsg := fmt.Errorf("get users: %w", err)
+		errMsg := fmt.Errorf("get users failed: %w", err)
 		return errMsg
 	}
 
