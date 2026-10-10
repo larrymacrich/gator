@@ -22,7 +22,7 @@ func handlerFeedFollowing(s *state, cmd command, user database.User) error {
 		return errMsg
 	}
 
-	fmt.Printf("current user '%s' is following %v feed(s)\n", user.Name, len(feedFollowsForUser))
+	fmt.Printf("'%s' is following %v feed(s)\n", user.Name, len(feedFollowsForUser))
 	printFeedFollowsForUser(feedFollowsForUser)
 
 	return nil
