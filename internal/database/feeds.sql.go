@@ -22,7 +22,7 @@ VALUES (
     $5,
     $6
 )
-RETURNING id, user_id, created_at, updated_at, name, url
+RETURNING id, user_id, created_at, updated_at, name, url, last_fetched_at
 `
 
 type CreateFeedParams struct {
@@ -51,12 +51,13 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 		&i.UpdatedAt,
 		&i.Name,
 		&i.Url,
+		&i.LastFetchedAt,
 	)
 	return i, err
 }
 
 const getFeedByURL = `-- name: GetFeedByURL :one
-SELECT id, user_id, created_at, updated_at, name, url
+SELECT id, user_id, created_at, updated_at, name, url, last_fetched_at
 FROM feeds
 WHERE url = $1
 `
@@ -71,12 +72,13 @@ func (q *Queries) GetFeedByURL(ctx context.Context, url string) (Feed, error) {
 		&i.UpdatedAt,
 		&i.Name,
 		&i.Url,
+		&i.LastFetchedAt,
 	)
 	return i, err
 }
 
 const getFeeds = `-- name: GetFeeds :many
-SELECT id, user_id, created_at, updated_at, name, url
+SELECT id, user_id, created_at, updated_at, name, url, last_fetched_at
 FROM feeds
 `
 
@@ -96,6 +98,7 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
 			&i.UpdatedAt,
 			&i.Name,
 			&i.Url,
+			&i.LastFetchedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -108,4 +111,50 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getNextFeedToFetch = `-- name: GetNextFeedToFetch :one
+SELECT id, user_id, created_at, updated_at, name, url, last_fetched_at
+FROM feeds
+ORDER BY last_fetched_at ASC NULLS FIRST
+LIMIT 1
+`
+
+func (q *Queries) GetNextFeedToFetch(ctx context.Context) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, getNextFeedToFetch)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.LastFetchedAt,
+	)
+	return i, err
+}
+
+const markFeedFetched = `-- name: MarkFeedFetched :one
+UPDATE feeds
+SET
+    updated_at = NOW(),
+    last_fetched_at = NOW()
+WHERE id = $1
+RETURNING id, user_id, created_at, updated_at, name, url, last_fetched_at
+`
+
+func (q *Queries) MarkFeedFetched(ctx context.Context, id uuid.UUID) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, markFeedFetched, id)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.LastFetchedAt,
+	)
+	return i, err
 }
