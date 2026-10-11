@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,13 +26,18 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	feedParams := database.CreateFeedParams{
 		ID:        uuid.New(),
 		UserID:    user.ID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
 		Name:      feedName,
 		Url:       feedUrl,
 	}
 	newFeed, err := s.db.CreateFeed(context.Background(), feedParams)
 	if err != nil {
+		// silence duplicate key violations in error log
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			errMsg := fmt.Errorf("you are already following feed %s.", feedName)
+			return errMsg
+		}
 		errMsg := fmt.Errorf("creating feed %s failed: %w", feedName, err)
 		return errMsg
 	}
@@ -41,8 +47,8 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	// connect current user and new feed
 	feedFollowParams := database.CreateFeedFollowParams{
 		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
 		UserID:    user.ID,
 		FeedID:    newFeed.ID,
 	}
@@ -52,8 +58,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		return errMsg
 	}
 
-	fmt.Printf("'%s' is now following '%s':\n", user.Name, newFeed.Name)
-	printFeedFollow(&newFeedFollow)
+	fmt.Printf("'%s' is now following '%s':\n", user.Name, newFeedFollow.FeedName)
 
 	return nil
 }

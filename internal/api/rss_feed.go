@@ -79,3 +79,19 @@ func cleanResponse(data *RSSFeed) {
 		data.Channel.Item[i].Description = html.UnescapeString(data.Channel.Item[i].Description)
 	}
 }
+
+func (rssFeed *RSSFeed) PrintRSSFeed() {
+	fmt.Println("RSSFeed Channel: ")
+	fmt.Printf("Title: %s\n", rssFeed.Channel.Title)
+	fmt.Printf("Link: %s\n", rssFeed.Channel.Link)
+	fmt.Printf("Description: %s\n", rssFeed.Channel.Description)
+	fmt.Println("=====================================")
+	for i := range rssFeed.Channel.Item {
+		fmt.Printf("	RSSItem: #%v\n", i)
+		fmt.Printf("	Title: %s\n", rssFeed.Channel.Item[i].Title)
+		fmt.Printf("	Link: %s\n", rssFeed.Channel.Item[i].Link)
+		fmt.Printf("	Description: %s\n", rssFeed.Channel.Item[i].Description)
+		fmt.Printf("	PubDate: %s\n", rssFeed.Channel.Item[i].PubDate)
+		fmt.Println("	=====================================")
+	}
+}

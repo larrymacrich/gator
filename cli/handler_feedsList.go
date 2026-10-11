@@ -34,7 +34,7 @@ func handlerListFeeds(s *state, cmd command) error {
 			return errMsg
 		}
 		fmt.Printf("feed #%v created by '%s':\n", i, name)
-		printFeed(&feed)
+		printFeedsRow(&feed)
 	}
 
 	return nil
