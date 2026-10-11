@@ -49,6 +49,7 @@ func RunCommand() error {
 	cliCommands.register("follow", middlewareLoggedIn(handlerFeedFollow))
 	cliCommands.register("following", middlewareLoggedIn(handlerFeedFollowing))
 	cliCommands.register("unfollow", middlewareLoggedIn(handlerFeedUnfollow))
+	cliCommands.register("browse", middlewareLoggedIn(handlerListPosts))
 
 	// Setup CMD
 	cliArgs := os.Args

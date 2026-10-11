@@ -2,10 +2,14 @@ package cli
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/larrymacrich/gator/internal/api"
+	"github.com/larrymacrich/gator/internal/database"
 )
 
 // handlerAgg takes a time frame <timeBetweenRequests>
@@ -65,9 +69,60 @@ func scrapeFeeds(s *state) error {
 		return errMsg
 	}
 
-	// print the rss feed to the console
-	fetchedFeed.PrintRSSFeed()
+	// save the posts
+	fmt.Printf("fetching post from feed: '%s'\n", markedFeed.Url)
+	fmt.Println("============FEED START===========")
+	for _, item := range fetchedFeed.Channel.Item {
+		creatPostParams := database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			Title:     item.Title,
+			Url:       item.Link,
+			Description: sql.NullString{
+				String: item.Description,
+				Valid:  item.Description != "",
+			},
+			PublishedAt: convertDateStringToTime(item.PubDate),
+			FeedID:      markedFeed.ID,
+		}
+		post, err := s.db.CreatePost(context.Background(), creatPostParams)
+		if err != nil {
+			// silence duplicate key violations
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				continue
+			}
+			fmt.Printf("saving post '%s' form feed '%s' failed: %v\n", item.Link, markedFeed.Name, err)
+			continue
+		}
+		fmt.Printf("saving post '%s'\n", post.Url)
+	}
+	fmt.Println("============FEED END=============")
 
 	return nil
+}
 
+// convertDateStringToTime takes a time format <dateString>
+// and converts it into sql.NullTime using
+// most common time formats used in RSS 2.0 feeds:
+// ttime.RFC1123, time.RFC1123Z
+func convertDateStringToTime(dateString string) sql.NullTime {
+	formats := []string{
+		time.RFC3339,
+		time.RFC1123,
+		time.RFC1123Z,
+	}
+
+	for _, format := range formats {
+		t, err := time.Parse(format, dateString)
+		if err == nil {
+			return sql.NullTime{
+				Time:  t,
+				Valid: true,
+			}
+		}
+	}
+	fmt.Printf("unable to parse time: %s", dateString)
+
+	return sql.NullTime{}
 }

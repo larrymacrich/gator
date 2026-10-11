@@ -12,3 +12,4 @@ CREATE TABLE posts (
 );
 -- +goose Down
 DROP TABLE posts;
+
